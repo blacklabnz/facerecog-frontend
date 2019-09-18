@@ -1,0 +1,31 @@
+<div style="text-align:center; margin-top: 20px; color: black">
+  <h1>
+    Happy or not ?
+  </h1>
+</div>
+
+<div class="blobstorage-section">
+  <!-- <i class="fa fa-plus fa-2x" style="cursor: pointer; color: rgb(0, 0, 0);" (click)="addFile()"></i>&nbsp; Add images to Azure blob storage -->
+  <button type="submit" class="btn btn-primary" (click)="addFile()">Uplaod Images</button>
+  <input style="display: none;" type="file" id="fileUpload" #selectedFile [(ngModel)]="fileUpload" (click)="selectedFile.value = null" value="" (change)="handleFileInput($event.target.files)" />
+  <table style="margin-top: 20px;">
+    <tr>
+      <th class="column1">Uploaded Files</th>
+      <th class="column2" style="text-align:center;">Download</th>
+      <th class="column3" style="text-align:center;">Delete</th>
+      <th class="column4" style="text-align:center;">Check</th>
+      <!-- <th class="column5" style="text-align:center;">TheResults</th> -->
+    </tr>
+    <tr *ngFor="let file of files">
+      <td class="column1">{{file.name}} <br />
+        <img src={{file.storageUri.primaryUri}} />
+      </td>
+      <td class="column2" style="text-align:center;cursor: pointer;" (click)="downloadFile(file.name)"><i class="fa fa-download fa-2x"></i></td>
+      <td class="column3" style="text-align:center;cursor: pointer;" (click)="deleteFile(file.name)"><i class="fa fa-trash fa-2x"></i></td>
+      <td class="column4" style="text-align:center;cursor: pointer;" (click)="checkFile(file.storageUri.primaryUri)"><i class="fa fa-smile-o fa-2x"></i></td>
+      <!-- <td class="column5"> {{faceResponse}} </td> -->
+    </tr>
+  </table>
+</div>
+
+

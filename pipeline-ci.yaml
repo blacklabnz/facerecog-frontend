@@ -1,0 +1,151 @@
+name: $(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
+
+trigger:
+  branches:
+    include:
+      - master
+
+stages:
+- stage: Fronted_Build
+  displayName: 'FaceRecog frontend Build'
+  jobs:
+  - job: Build
+    displayName: 'Building FaceRecog frontend component'
+    pool:
+      name: Hosted Windows 2019 with VS2019
+
+    steps:
+    - checkout: self
+      fetchDepth: 10
+      clean: false
+
+    - task: Npm@1
+      displayName: 'npm install'
+      inputs:
+        verbose: false
+
+    - task: Npm@1
+      displayName: 'npm build ci'
+      inputs:
+        command: custom
+        verbose: false
+        customCommand: 'run build-ci'
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish artifacts frontend-ci'
+      inputs:
+        PathtoPublish: '$(Build.SourcesDirectory)/dist/artifacts'
+        ArtifactName: 'frontend-ci'
+
+    - task: Npm@1
+      displayName: 'npm build prod'
+      inputs:
+        command: custom
+        verbose: false
+        customCommand: 'run build-prod'
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish artifacts frontend-prod'
+      inputs:
+        PathtoPublish: '$(Build.SourcesDirectory)/dist/artifacts'
+        ArtifactName: 'frontend-prod'
+
+    - script: |
+        git clone https://github.com/zufengxu/facerecog-infrastructure.git
+      workingDirectory: '$(Build.SourcesDirectory)'
+      displayName: 'Command Line Script'
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish artifacts infrastructure'
+      inputs:
+        PathtoPublish: '$(Build.SourcesDirectory)/facerecog-infrastructure'
+        ArtifactName: infrastructure
+
+
+- stage: FaceRecog_Front_Release_CI
+  displayName: 'FaceRecog CI Deployment'
+  jobs:
+  - deployment: Deployment_Continuous_Integration
+    displayName: 'Deploying to CI environment'
+    pool:
+      name: Hosted Windows 2019 with VS2019
+
+    variables:
+      enterpriseCode: 'par'
+      environmentCode: 'ci'
+      contextCode: 'fr'
+      regionCode: 'sea'
+
+    environment: 'Continuous Integration'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - template: deployment-steps.yaml
+              parameters:
+                enterpriseCode: ${{ variables.enterpriseCode }}
+                environmentCode: ${{ variables.environmentCode }}
+                contextCode: ${{ variables.contextCode }}
+                regionCode: ${{ variables.regionCode }}
+                functionKey: $(functionKey-ci)
+                azureSubscription: 'Microsoft Azure Sponsorship (4a72c271-a544-46af-8e9d-75bb1f1e9865)'
+
+            - task: ArchiveFiles@2
+              displayName: zip
+              inputs:
+                rootFolderOrFile: '$(Agent.BuildDirectory)/frontend-ci'
+                includeRootFolder: false
+                archiveFile: '$(Agent.BuildDirectory)/frontend.zip'
+
+            - task: AzureRmWebAppDeployment@4
+              displayName: 'Frontend webapp deploy: ${{ variables.enterpriseCode }}-${{ variables.environmentCode }}-${{ variables.regionCode }}-aglr-${{ variables.contextCode }}'
+              inputs:
+                azureSubscription: 'Microsoft Azure Sponsorship (4a72c271-a544-46af-8e9d-75bb1f1e9865)'
+                WebAppName: ' ${{ variables.enterpriseCode }}-${{ variables.environmentCode }}-${{ variables.regionCode }}-aglr-${{ variables.contextCode }}'
+                packageForLinux: '$(Agent.BuildDirectory)/frontend.zip'
+                enableCustomDeployment: true
+                DeploymentType: zipDeploy
+
+- stage: FaceRecog_Front_Release_Prod
+  displayName: 'FaceRecog Prod Deployment'
+  jobs:
+  - deployment: Deployment_Production
+    displayName: 'Deploying to production environment'
+    pool:
+      name: Hosted Windows 2019 with VS2019
+
+    variables:
+      enterpriseCode: 'par'
+      environmentCode: pr
+      contextCode: 'fr'
+      regionCode: 'sea'
+
+    environment: 'Production'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - template: deployment-steps.yaml
+              parameters:
+                enterpriseCode: ${{ variables.enterpriseCode }}
+                environmentCode: ${{ variables.environmentCode }}
+                contextCode: ${{ variables.contextCode }}
+                regionCode: ${{ variables.regionCode }}
+                functionKey: $(functionKey-ci)
+                azureSubscription: 'Microsoft Azure Sponsorship (4a72c271-a544-46af-8e9d-75bb1f1e9865)'
+
+            - task: ArchiveFiles@2
+              displayName: zip
+              inputs:
+                rootFolderOrFile: '$(Agent.BuildDirectory)/frontend-ci'
+                includeRootFolder: false
+                archiveFile: '$(Agent.BuildDirectory)/frontend.zip'
+
+            - task: AzureRmWebAppDeployment@4
+              displayName: 'Frontend webapp deploy: ${{ variables.enterpriseCode }}-${{ variables.environmentCode }}-${{ variables.regionCode }}-aglr-${{ variables.contextCode }}'
+              inputs:
+                azureSubscription: 'Microsoft Azure Sponsorship (4a72c271-a544-46af-8e9d-75bb1f1e9865)'
+                WebAppName: ' ${{ variables.enterpriseCode }}-${{ variables.environmentCode }}-${{ variables.regionCode }}-aglr-${{ variables.contextCode }}'
+                packageForLinux: '$(Agent.BuildDirectory)/frontend.zip'
+                enableCustomDeployment: true
+                DeploymentType: zipDeploy
