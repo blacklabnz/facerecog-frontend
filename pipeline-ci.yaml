@@ -108,6 +108,8 @@ stages:
 
 - stage: FaceRecog_Front_Release_Prod
   displayName: 'FaceRecog Prod Deployment'
+  dependsOn: FaceRecog_Front_Release_CI
+  condition: succeeded()
   jobs:
   - deployment: Deployment_Production
     displayName: 'Deploying to production environment'
