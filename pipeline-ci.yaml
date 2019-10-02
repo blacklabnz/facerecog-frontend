@@ -139,7 +139,7 @@ stages:
             - task: ArchiveFiles@2
               displayName: zip
               inputs:
-                rootFolderOrFile: '$(Agent.BuildDirectory)/frontend-ci'
+                rootFolderOrFile: '$(Agent.BuildDirectory)/frontend-prod'
                 includeRootFolder: false
                 archiveFile: '$(Agent.BuildDirectory)/frontend.zip'
 
