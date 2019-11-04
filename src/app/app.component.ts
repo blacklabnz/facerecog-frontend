@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { saveAs } from 'file-saver';
 import { environment } from '../environments/environment';
+import { error } from 'util';
 declare var require: any;
 
 @Component({
@@ -17,11 +18,20 @@ export class AppComponent implements OnInit {
   fileUpload: any;
   fileUpoadInitiated: boolean;
   fileDownloadInitiated: boolean;
-  private funcKey = environment.funcKey;
-  private blobBaseUrl = "https://" + environment.enterpriseCode + "-" + environment.environmentCode + "-" + environment.locationCode + "-api-" + environment.contextCode + ".azurewebsites.net/api/blobstorage";
-  private funcBaseUrl = "https://" + environment.enterpriseCode + "-" + environment.environmentCode + "-" + environment.locationCode + "-fnc-" + environment.contextCode + ".azurewebsites.net/api/FaceFunction"
+  private funcKey: string;
+  private blobBaseUrl: string;
+  private funcBaseUrl: string;
 
   ngOnInit(): void {
+    if (environment.environmentCode != "container") {
+      this.funcKey = environment.funcKey;
+      this.blobBaseUrl = "https://" + environment.enterpriseCode + "-" + environment.environmentCode + "-" + environment.locationCode + "-api-" + environment.contextCode + ".azurewebsites.net/api/blobstorage";
+      this.funcBaseUrl = "https://" + environment.enterpriseCode + "-" + environment.environmentCode + "-" + environment.locationCode + "-fnc-" + environment.contextCode + ".azurewebsites.net/api/FaceFunction";
+    }
+    else {
+      this.blobBaseUrl = environment.kubeblobBaseUrl;
+      this.funcBaseUrl = environment.kubefuncBaseUrl;
+    }
     this.showBlobs();
   }
 
@@ -30,6 +40,7 @@ export class AppComponent implements OnInit {
       this.files = result;
     }, error => console.error(error));
   }
+
 
   addFile() {
     if (!this.fileUpoadInitiated) {
@@ -42,7 +53,6 @@ export class AppComponent implements OnInit {
     this.fileToUpload = formData;
     this.onUploadFiles();
   }
-
   onUploadFiles() {
     if (this.fileUpoadInitiated) {
       return;
@@ -98,7 +108,6 @@ export class AppComponent implements OnInit {
     }, error => console.error(error));
   }
   checkFile(imageUrl: string){
-
     let headers = new HttpHeaders({
       'Content-Type': 'application/json',
       'x-functions-key': this.funcKey });

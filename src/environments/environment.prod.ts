@@ -4,5 +4,7 @@ export const environment = {
   environmentCode: 'pr',
   locationCode: 'sea',
   contextCode: "fr",
-  funcKey: 'n0on3kn0wswhatth3k3y1spr0d'
+  funcKey: 'n0on3kn0wswhatth3k3y1spr0d',
+  kubeblobBaseUrl: "n/a",
+  kubefuncBaseUrl: "n/a",
 };

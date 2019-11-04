@@ -5,7 +5,7 @@ COPY . /AngularApp
 RUN cd AngularApp && \
     npm install && \
     npm audit fix && \
-    npm run build-ci
+    npm run build-container
 
 FROM nginx:alpine
 

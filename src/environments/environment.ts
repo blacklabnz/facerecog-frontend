@@ -8,7 +8,9 @@ export const environment = {
   environmentCode: '',
   locationCode: '',
   contextCode: '',
-  funcKey: ''
+  funcKey: '',
+  kubeblobBaseUrl: '',
+  kubefuncBaseUrl: '',
 };
 
 /*
