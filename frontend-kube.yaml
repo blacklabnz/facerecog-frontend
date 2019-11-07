@@ -1,0 +1,42 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: frontend
+  labels:
+    name: frontend
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: nxuacr.azurecr.io/facerecog/frontend:0.0.3
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+      dnsPolicy: None
+      dnsConfig:
+        nameservers:
+          - 8.8.8.8
+        searches:
+          - nkhngbc1dpvehj4upoqzn5gcub.ix.internal.cloudapp.net
+      imagePullSecrets:
+      - name: facerecogsecret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  labels:
+    name: frontend
+spec:
+  type: Loadbalancer
+  loadbalancerIP: 168.63.254.185
+  ports:
+  - port: 80
+    targetPort: 80
+  selector:
+    app: frontend
