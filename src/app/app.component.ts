@@ -22,6 +22,8 @@ export class AppComponent implements OnInit {
   private blobBaseUrl: string;
   private funcBaseUrl: string;
 
+  private env = environment
+
   ngOnInit(): void {
     if (environment.environmentCode != "container") {
       this.funcKey = environment.funcKey;
@@ -109,10 +111,11 @@ export class AppComponent implements OnInit {
   }
   checkFile(imageUrl: string){
     let headers = new HttpHeaders({
-      'Content-Type': 'application/json',
-      'x-functions-key': this.funcKey });
+      'Content-Type': 'application/json'});
+    if (environment.environmentCode != 'container') {
+      headers = headers.append('x-functions-key', this.funcKey);
+    }
     let options = {headers: headers}
-
     this.http.post<any>(this.funcBaseUrl, '{"url":"' + imageUrl +'"}', options).subscribe(result => {
       this.faceResponse = JSON.stringify(result[0].faceAttributes);
       alert(JSON.parse(JSON.stringify(this.faceResponse)));

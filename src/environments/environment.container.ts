@@ -4,8 +4,7 @@ export const environment = {
   environmentCode: 'container',
   locationCode: 'sea',
   contextCode: "fr",
-  funcKey: 'n/a',
-  kubeblobBaseUrl: "https://kube.com/blob",
-  kubefuncBaseUrl: "https://kube.com/func",
-
+  funcKey: 'na',
+  kubeblobBaseUrl: "http://ingress.southeastasia.cloudapp.azure.com/web",
+  kubefuncBaseUrl: "http://ingress.southeastasia.cloudapp.azure.com/func/FaceFunction",
 };
